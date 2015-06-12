@@ -1,6 +1,6 @@
 compile:clean cliente.out server.out
 cliente.out:
-	clear
+	gcc cliente.c -std=c99 -Wformat -Wimplicit-function-declaration -o cliente.out
 clean:
 	rm -f *.out
 server.out:
@@ -10,6 +10,6 @@ runServer: compile
 	./server.out
 runClient: compile
 	clear
-	./cliente.out
+	./cliente.out < ips.txt
 	
 	

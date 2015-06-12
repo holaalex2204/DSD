@@ -17,9 +17,9 @@ int main(void)
     int s, num[2], res;
     unsigned char dest[4];
     char ip[16];
-    
+    printf("Ingresa una ip\n");
     scanf("%s",&ip);
-    
+    printf("Enviando petición a %s\n",ip  );
     s = socket(AF_INET, SOCK_DGRAM, 0);
    /* rellena la dirección del servidor */
     bzero((char *)&msg_to_server_addr, sizeof(msg_to_server_addr));
