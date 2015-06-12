@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <netinet/in.h>
 #include <netdb.h>
-#include <strings.h>
+#include <string.h>
 
 int puerto = 7200;
 
