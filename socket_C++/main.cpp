@@ -10,6 +10,7 @@
 #include <semaphore.h>
 #include <set>
 #include <iostream>
+#include <errno.h>
 sem_t listenerSem;
 sem_t senderSem;
 SocketDatagrama* socketDat;
@@ -26,7 +27,7 @@ void imprimeSet()
 }
 void limpiaTabla()
 {
-	imprimeSet();
+	imprimeSet(); 	
 	listaIps.clear();
 	imprimeSet();
 }
@@ -41,15 +42,27 @@ char * intToString(int num)
 
 void enviaPeticiones(void)
 {
+
+	printf("Enviando petición a : %s\n",paqueteEnviarDat->obtieneDireccion());
+	int aux = socketDat->envia(*paqueteEnviarDat);
+	if(aux==-1) 
+	{
+		char* msjError = new char[700];
+		printf("Ocurrio algún error en el envío\n");
+		perror(msjError);
+		printf("%s\n",msjError);
+		delete msjError;
+	}
 	for(;;)
 	{		
 		//printf("Wait sobre senderSem \n");
-		sem_wait(&senderSem);
-		printf("Enviando petición a : %s\n",paqueteEnviarDat->obtieneDireccion());
-		socketDat->envia(*paqueteEnviarDat);
+		sem_wait(&senderSem);	
+		imprimeSet();
+		printf("Limpiando la tabla\n");
+		limpiaTabla();
 		//printf("Post sobre listenerSem\n");
 		sem_post(&listenerSem);
-		sleep(10);
+		sleep(100);
 		//printf("Wait sobre listenerSem \n");
 		sem_wait(&listenerSem);
 		//printf("Post sobre senderSem\n");
@@ -70,7 +83,6 @@ void GeneraTabla(void)
 		memcpy(&nume,paqueteRecibirDat->obtieneDatos(),sizeof(int));
 		printf("Respuesta de %s\n",paqueteRecibirDat->obtieneDireccion());	
 		listaIps.insert(paqueteRecibirDat->obtieneDireccion());
-		imprimeSet();
 		//printf("Post sobre listenerSem\n");
 		sem_post(&listenerSem);
 	}
