@@ -49,6 +49,7 @@ void enviaPeticiones(void)
 	{
 		char* msjError = new char[700];
 		printf("Ocurrio algún error en el envío\n");
+		printf ("Error al enviar : %s\n",strerror(errno));
 		perror(msjError);
 		printf("%s\n",msjError);
 		delete msjError;
@@ -56,17 +57,18 @@ void enviaPeticiones(void)
 	for(;;)
 	{		
 		//printf("Wait sobre senderSem \n");
-		sem_wait(&senderSem);	
+		//sem_wait(&senderSem);	
 		imprimeSet();
 		printf("Limpiando la tabla\n");
 		limpiaTabla();
+		socketDat->envia(*paqueteEnviarDat);
 		//printf("Post sobre listenerSem\n");
-		sem_post(&listenerSem);
-		sleep(100);
+		//sem_post(&listenerSem);
+		sleep(10);
 		//printf("Wait sobre listenerSem \n");
-		sem_wait(&listenerSem);
+		//sem_wait(&listenerSem);
 		//printf("Post sobre senderSem\n");
-		sem_post(&senderSem);
+		//sem_post(&senderSem);
 	}
 }
 void GeneraTabla(void)
@@ -76,7 +78,7 @@ void GeneraTabla(void)
 	for(;;)
 	{
 		//printf("Wait sobre listenerSem \n");
-		sem_wait(&listenerSem);
+		//sem_wait(&listenerSem);
 		printf("Esperando ŕespuesta...\n");
 		socketDat->recibe(*paqueteRecibirDat);
 		nume = 0;
@@ -84,13 +86,13 @@ void GeneraTabla(void)
 		printf("Respuesta de %s\n",paqueteRecibirDat->obtieneDireccion());	
 		listaIps.insert(paqueteRecibirDat->obtieneDireccion());
 		//printf("Post sobre listenerSem\n");
-		sem_post(&listenerSem);
+		//sem_post(&listenerSem);
 	}
 }
 int main()
 {
 	//SocketDatagrama socket  = NULL;
-	char ipParcial[] = "192.168.0.255";
+	char ipParcial[] = "10.211.55.255";
 	char* ip = new char[18];
 	int num[2];
 	char* aux;
@@ -104,13 +106,22 @@ int main()
 	//Inicializacion de variables
 	PaqueteDatagrama paqueteRecibir = PaqueteDatagrama(4);
 	PaqueteDatagrama paqueteEnviar = PaqueteDatagrama((char*)num,(sizeof(num)/sizeof(char)),ipParcial,7200);
-	SocketDatagrama socket= SocketDatagrama(7200);
+	SocketDatagrama socket= SocketDatagrama(7300);
 	//Asignación de variables a apuntadores globales
 	socketDat = &socket;
 	paqueteRecibirDat = &paqueteRecibir;
 	paqueteEnviarDat = &paqueteEnviar;
-	
-	
+	printf("Enviando petición a : %s\n",paqueteEnviarDat->obtieneDireccion());
+	int auxnum = socketDat->envia(*paqueteEnviarDat);
+	if(auxnum==-1)
+	{
+		char* msjError = new char[700];
+		printf("Ocurrio algún error en el envío\n");
+		printf ("Error al enviar : %s\n",strerror(errno));
+		perror(msjError);
+		printf("%s\n",msjError);
+		delete msjError;
+	}
 	pthread_t listenerTh;
 	sem_init(&listenerSem,0,0);
 	sem_init(&senderSem,0,1);
