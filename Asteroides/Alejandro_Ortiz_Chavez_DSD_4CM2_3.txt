@@ -1,0 +1,452 @@
+***************************************************************************
+Makefile
+/* 
+Archivo que se encarga de la compilación y construcción del ejecutable para correr el programa
+*/
+sdl1:  sdl1.cpp
+	g++ -std=c++11 sdl1.cpp -o sdl1 -lSDL2
+compile: sdl1.o  Coordenada.o Asteroide.o GameProyecto.o
+	clear
+	g++ ej3.cpp GameProyecto.o Coordenada.o Asteroide.o Vector2D.o -o ej3 -lSDL2
+GameProyecto.o: GameProyecto.cpp GameProyecto.h Coordenada.o Asteroide.o Vector2D.o
+	g++ GameProyecto.cpp Asteroide.o Coordenada.o Vector2D.o -std=c++11 sdl1.cpp -c -lSDL2
+Coordenada.o: Coordenada.cpp Coordenada.h
+	g++ Coordenada.cpp  -c -std=c++11
+Asteroide.o: Asteroide.cpp Asteroide.h Vector2D.o
+	g++ Asteroide.cpp Coordenada.o Vector2D.o -c -std=c++11	
+Vector2D.o: 
+	g++ Vector2D.cpp -c -std=c++11	
+clean:
+	rm *.o -f
+run: compile
+	./ej3
+***************************************************************************
+Coordenada.h
+/*
+Define toda la estructura para manejar puntos en un espacio 2D
+*/
+#ifndef COORDENADA_H_
+#define COORDENADA_H_ 
+class Coordenada
+{
+private:
+
+	double x;
+
+	double y;
+public:
+
+	Coordenada(double = 0, double = 0);
+
+	double obtenerX();
+
+	double obtenerY();
+};
+#endif
+***************************************************************************
+Coordenada.cpp
+/*
+Implementa las operaciones definidas en Coordenada.h
+*/
+#include <iostream>
+#include "Coordenada.h"
+#include <math.h> 
+using namespace std;
+Coordenada::Coordenada(double xx, double yy) : x(xx), y(yy)
+{ }
+double Coordenada::obtenerX()
+{
+
+	return x;
+}
+
+double Coordenada::obtenerY()
+{
+
+	return y;
+}
+***************************************************************************
+Asteroide.h
+/*
+Clase que se encargara de representar un polígono regular, algunas de las cosas que puede hacer esta clase es calcular el área, construir un poligono con un radio y cantidad de lados definidos. 
+Tambien calcula los puntos en los que estan colocados los vertices con respecto a un centro.
+*/
+#ifndef Asteroide_H_
+#define Asteroide_H_ 
+#include <iostream>
+#include <cmath>
+#include <vector>
+#include "Coordenada.h"
+#include "Vector2D.h"
+using namespace std;
+
+class Asteroide
+{
+private:
+	long double alpha;
+	long double rot;
+	int numLados;
+	long double r;
+	Coordenada centro;
+	const long double PI = acos(-1.0);
+	vector <Coordenada> vertices;
+
+public:
+	Vector2D desplazamiento;
+	Asteroide(int cantLados =3, long double radio =1.0);
+	double calcArea();
+	void posicionaCentro(Coordenada );
+	Coordenada obtenCentro();
+	vector<Coordenada> obtenVertices();
+	int obtenNumLados();
+	long double obtenRadio();
+	void rota(long double velocidad);
+};
+#endif
+***************************************************************************
+Asteroide.cpp
+/*
+Implementa las operaciones necesarias para PoligonoRegular.h
+*/
+#include "Asteroide.h"
+#include "Coordenada.h" 
+#include <iostream>
+#include <cmath>
+#include <stdlib.h> 
+#include <time.h>
+#include "Vector2D.h"
+using namespace std;
+Asteroide::Asteroide(int cantLados, long double radio) 
+{ 
+	
+	double aux;
+	r = radio;
+	numLados = cantLados;
+	alpha = 2*PI/cantLados;
+	printf("NumLados es %d\n", numLados );
+	printf("radio es %lf\n", r );
+	for(int i = 0; i<cantLados; i++)
+	{
+		srand (i*7367);
+		aux =100/((float)((rand()%30 + rand()%10)+100));
+		if(i%3 ==0)
+		{
+			vertices.push_back(Coordenada(sin(alpha*i)*r*aux,cos(alpha*i)*r*aux));	
+		}
+		else
+		{
+			vertices.push_back(Coordenada(sin(alpha*i)*r*1,cos(alpha*i)*r*1));		
+		}
+	}
+	centro = Coordenada(-100,-100);
+	rot = 0;
+	desplazamiento = Vector2D((float)rand(),(float)rand());
+	if(((int)desplazamiento.getX())%2==0)	desplazamiento.setX(-desplazamiento.getX());
+	if(((int)desplazamiento.getY())%2==0)	desplazamiento.setY(-desplazamiento.getY());
+	desplazamiento.normaliza();
+}
+double Asteroide::calcArea() //Calcula el área del círculo
+{
+	return(numLados*sin(alpha/2)*cos(alpha/2)*r*r);
+}
+void Asteroide::posicionaCentro(Coordenada cent)
+{
+	centro = cent; 
+}
+Coordenada Asteroide::obtenCentro()
+{
+	return centro;
+}
+vector<Coordenada> Asteroide::obtenVertices()
+{
+	vector<Coordenada> v;
+	double x = 0;
+	double y = 0;
+	for(int i = 0; i<numLados;i++)
+	{
+		//aplicamos rotacion
+		x = vertices[i].obtenerX()*cos(rot)-vertices[i].obtenerY()*sin(rot);
+		y = vertices[i].obtenerY()*cos(rot)+vertices[i].obtenerX()*sin(rot);
+		v.push_back(Coordenada(x + centro.obtenerX() ,  y + centro.obtenerY()));
+	}
+	return v;
+}
+int Asteroide::obtenNumLados()
+{
+	return numLados;
+}
+long double Asteroide::obtenRadio()
+{
+	return r;
+}
+void Asteroide::rota(long double velocidad)
+{
+	rot = rot + 2*PI/1000*velocidad;
+}
+***************************************************************************
+GameProyecto.h
+/*
+Clase que se encargara de representar la logica de un juego y en la que nos basaremos para distribuir las actividades de cada uno de los pasos para dar seguimiento 
+a la ejecucion de esta animacion
+*/#ifndef __GameProyecto__
+#define __GameProyecto__
+#include <iostream>
+#include <vector>
+#include "Coordenada.h"
+#include "Asteroide.h"
+#include <SDL2/SDL.h>
+class GameProyecto
+{
+public:
+	GameProyecto();
+	~GameProyecto() ;
+	void init(char*, int , int , int ,int , int, int);
+	void render();
+	void update();
+	void handleEvents();
+	void clean();
+	bool running();
+private:
+	bool m_bRunning;
+	SDL_Window* m_pWindow;
+	SDL_Renderer* m_pRenderer;
+	SDL_Texture *tex;
+	SDL_Surface *bmp;
+	vector<Asteroide> asteroides;
+};
+#endif
+#endif
+***************************************************************************
+GameProyecto.cpp
+/*
+Implmenta todas las operacioens de GameProyecto.h y es aqui donde utiliza todos los poligonos necesarios para mostrar en la interfaz. Esta es la clase mas importante desde mi punto de 
+vista.
+*/
+#include "GameProyecto.h"	
+#include <iostream>
+#include "Asteroide.h"
+#include "Coordenada.h"
+#include <SDL2/SDL.h>
+#include <time.h>
+#include "Vector2D.h"
+GameProyecto::GameProyecto() {
+	m_bRunning = true;
+}	
+GameProyecto::~GameProyecto() {}
+void GameProyecto:: init(char* titulo ="Hola Mundo",int xpos = 0, int ypos = 0 , int alto = 100, int ancho = 100 , int banderas = 0, int cantAsteroides=100
+)
+{
+	
+	if (SDL_Init(SDL_INIT_EVERYTHING) != 0){
+		std::cout << "SDL_Init Error: " << SDL_GetError() << std::endl;
+		m_bRunning =  false;
+	}
+
+	m_pWindow = SDL_CreateWindow(titulo, xpos, ypos, alto, ancho, banderas);
+	if (m_pWindow == nullptr){
+		std::cout << "SDL_CreateWindow Error: " << SDL_GetError() << std::endl;
+		m_bRunning =  false;
+	}
+
+	m_pRenderer = SDL_CreateRenderer(m_pWindow, -1, SDL_RENDERER_ACCELERATED |
+		SDL_RENDERER_PRESENTVSYNC);
+	if (m_pRenderer == nullptr){
+		std::cout << "SDL_CreateRenderer Error: " << SDL_GetError() << std::endl;
+		m_bRunning =  false;
+	}
+	bmp = SDL_LoadBMP("./hello.bmp");
+	if (bmp == nullptr){
+		std::cout << "SDL_LoadBMP Error: " << SDL_GetError() << std::endl;
+		m_bRunning= false;
+	}
+	tex = SDL_CreateTextureFromSurface(m_pRenderer, bmp);
+	SDL_FreeSurface(bmp);
+	if (tex == nullptr){
+		std::cout << "SDL_CreateTextureFromSurface Error: " << SDL_GetError() << std::endl;
+		m_bRunning = false;
+	}
+	for(int i = 0 ; i<cantAsteroides ; i++)
+	{
+		srand (i);
+		int lados = (rand()%10 + rand()%15)%10 + 10;
+		long double radio  = rand()%15 + rand()%25 +10;
+		asteroides.push_back(Asteroide(lados,radio));
+		asteroides.back().posicionaCentro(Coordenada((rand()%600),rand()%800));
+	}
+}
+void GameProyecto:: render()
+{
+	SDL_Point p1,p2;
+	SDL_SetRenderDrawColor(m_pRenderer, 0, 0, 0, 255);
+	SDL_RenderClear(m_pRenderer);
+	SDL_SetRenderDrawColor(m_pRenderer, 255, 0, 0, 255);	
+	for(int  i=0; i < asteroides.size(); i++) {
+		Coordenada centro = asteroides[i].obtenCentro();
+		SDL_SetRenderDrawColor(m_pRenderer, rand()%255, rand()%255, rand()%255, 255);
+		vector<Coordenada> vertices = asteroides[i].obtenVertices();
+		p1.x = vertices.back().obtenerX();
+		p1.y = vertices.back().obtenerY();
+		for(int j = 0; j<vertices.size(); j++)
+		{
+			p2.x = vertices[j].obtenerX();
+			p2.y = vertices[j].obtenerY();
+			SDL_Point points[4] = { p1, p2};
+			SDL_RenderDrawLines(m_pRenderer, points, 2);
+			p1 = p2;
+		}
+	}
+	SDL_RenderPresent(m_pRenderer);
+}
+void GameProyecto:: update()
+{
+	for(int  i=0; i < asteroides.size(); i++) {
+		Coordenada centro = asteroides[i].obtenCentro();
+		if((centro.obtenerX()>650 || centro.obtenerX() <-50) || (centro.obtenerY()>650 || centro.obtenerY() <-50))
+		{
+			centro = Coordenada(rand()%600,rand()%800);
+			asteroides[i].desplazamiento = Vector2D((float)rand(),(float)rand());
+			if(((int)asteroides[i].desplazamiento.getX())%3==0)	asteroides[i].desplazamiento.setX(-asteroides[i].desplazamiento.getX());
+			if(((int)asteroides[i].desplazamiento.getY())%3==0)	asteroides[i].desplazamiento.setY(-asteroides[i].desplazamiento.getY());
+			asteroides[i].desplazamiento.normaliza();
+		}
+		asteroides[i].posicionaCentro(Coordenada(centro.obtenerX()+ 1000/asteroides[i].calcArea()*asteroides[i].desplazamiento.getX(), centro.obtenerY() + 1000/asteroides[i].calcArea()*asteroides[i].desplazamiento.getY()));
+		asteroides[i].rota(1000/asteroides[i].calcArea());
+	}
+}
+void GameProyecto:: handleEvents()
+{
+	SDL_Event event;
+	if(SDL_PollEvent(&event))
+	{
+		switch (event.type)
+		{
+			case SDL_QUIT:
+			m_bRunning = false;
+			break;
+			default:
+			break;
+		}
+	}
+}
+void GameProyecto:: clean()
+{
+	SDL_DestroyTexture(tex);
+	SDL_DestroyRenderer(m_pRenderer);
+	SDL_DestroyWindow(m_pWindow);
+	SDL_Quit();
+}
+bool GameProyecto:: running()
+{
+	return m_bRunning;
+}
+*********************************************************************************************************************
+ej3.cpp
+/*
+Es  el programa principal que controla la ejecución de nuestra animación haciendo uso de la lógica que viene en cada una de las clases
+*/
+#include "GameProyecto.h"
+#include "Coordenada.h"
+#include "Asteroide.h"
+#include <iostream>
+#include <vector>
+using namespace std;
+GameProyecto* g_game = 0;
+int main(int argc, char* argv[])
+{
+	g_game = new GameProyecto();
+	g_game->init("Proyecto Asteroides", 100, 50, 600, 800, SDL_WINDOW_SHOWN,30);
+	while(g_game->running())
+	{ 
+		g_game->handleEvents();
+		g_game->update();
+		g_game->render();
+	}
+	g_game->clean();
+}
+*********************************************************************************************************************
+
+Vector2D.cpp
+/*
+Sirve para controlar el desplazamiento
+*/
+#include "Vector2D.h"
+#include <math.h>
+#include <stdio.h>
+Vector2D::Vector2D(float x, float y )
+{
+	m_x = x;
+	m_y = y;
+}
+Vector2D::Vector2D(void)
+{
+	m_x = 0 ;
+	m_y = 0;
+}
+float Vector2D::getX()
+{
+	return m_x;
+}
+float Vector2D::getY()
+{
+	return m_y;
+}
+void Vector2D::setX(float x)
+{
+	m_x = x;
+}
+void Vector2D::setY(float y)
+{
+	m_y = y;
+}
+float Vector2D::length()
+{
+	return sqrt((m_x*m_x+ m_y*m_y));
+}
+void Vector2D::normaliza()
+{
+	float l = length();
+	m_x = m_x/l;
+	m_y = m_y/l;
+}
+******************************************************************************************************************************
+Vector2D.h
+/*
+Sirve para controlar el desplazamiento
+*/
+#ifndef VECTOR2D_H_
+#define VECTOR2D_H_
+#include <cmath>
+class Vector2D
+{
+public:
+	Vector2D(float, float);
+	Vector2D(void);
+	float getX();
+	float getY();
+	void setX(float x);
+	void setY(float y);
+	float length();
+	void normaliza();
+//Sobrecarga para adición de 2 vectores
+	Vector2D operator+(const Vector2D& v2) const {
+		return Vector2D(m_x + v2.m_x, m_y + v2.m_y);
+	}
+	friend Vector2D& operator+=(Vector2D& v1, const Vector2D& v2){
+		v1.m_x += v2.m_x;
+		v1.m_y += v2.m_y;
+		return v1;
+	}
+//Sobrecara para multiplicar un vector por un escalar
+	Vector2D operator*(float scalar){
+		return Vector2D(m_x * scalar, m_y * scalar);
+	} 
+	Vector2D& operator*=(float scalar){
+		m_x *= scalar;
+		m_y *= scalar;
+		return *this;
+	}
+private:
+	float m_x;
+	float m_y;
+};
+#endif
