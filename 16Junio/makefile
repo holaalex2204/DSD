@@ -9,4 +9,4 @@ PaqueteDatagrama.o: PaqueteDatagrama.cpp PaqueteDatagrama.h
 	g++ PaqueteDatagrama.cpp -c
 run: clean socket.out
 	clear
-	./socket.out "192.168.0.115" 7000 "10_servidor_archivos_ver5.pdf" 
+	./socket.out "127.0.0.1" 7000 hola.txt

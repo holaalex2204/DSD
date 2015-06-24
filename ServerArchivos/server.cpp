@@ -66,7 +66,7 @@ int main(int argc, char *argv[]){
                     cout << "El puerto de quien me enviÃ³ es: " << recepcion.obtienePuerto() << endl;
                     //recepcion.~PaqueteDatagrama();
                     memcpy((char *)&mensRcb, recepcion.obtieneDatos(), sizeof(mensRcb));
-                    cout << "OpciÃ³n recibida: = " << mensRcb.opcode << endl;
+                    cout << "Opcion recibida: = " << mensRcb.opcode << endl;
                     cout << "count: = " << mensRcb.count << endl;
                     cout << "offset: = " << mensRcb.offset << endl;
                     cout << "nombre: " << mensRcb.name << endl;
