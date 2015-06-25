@@ -76,6 +76,7 @@ void GameProyecto:: render()
 void GameProyecto:: update()
 {
 	int asteroidePeque;
+	int asteroideGrande;
 	for(int  i=0; i < asteroides.size(); i++) {
 		Coordenada centro = asteroides[i].obtenCentro();
 		if((centro.obtenerX()>650 || centro.obtenerX() <-50) || (centro.obtenerY()>850 || centro.obtenerY() <-50))
@@ -97,8 +98,18 @@ void GameProyecto:: update()
 				continue;	
 			if(asteroides[i].choca(&asteroides[j]))
 			{
-				if(asteroides[j].calcArea()>asteroides[i].calcArea())	asteroidePeque = i;
-				else asteroidePeque = j;
+				if(asteroides[j].calcArea()>asteroides[i].calcArea())
+				{
+					asteroidePeque = i;
+					asteroideGrande = j;
+				}	
+				else 
+				{
+					asteroidePeque = j;
+					asteroideGrande = i;
+				}						
+				asteroides[asteroideGrande].desplazamiento = Vector2D(asteroides[asteroideGrande].desplazamiento.getX() + asteroides[asteroidePeque].desplazamiento.getX()*2, asteroides[asteroideGrande].desplazamiento.getY()+ asteroides[asteroidePeque].desplazamiento.getY()*2);
+				asteroides[asteroideGrande].desplazamiento.normaliza();
 				centro = Coordenada(((double)600+rand()%50),(double)800+ rand()%50);
 				if(((int)(centro.obtenerX()))%2==0) centro = Coordenada(-centro.obtenerX()+600,centro.obtenerY());
 				if(((int)(centro.obtenerY()))%2==0) centro = Coordenada(centro.obtenerX(),-centro.obtenerY()+800);				

@@ -1,4 +1,5 @@
 compile: Coordenada.o Asteroide.o GameProyecto.o Vector2D.o
+	clear
 	g++ ej3.cpp GameProyecto.o Coordenada.o Asteroide.o Vector2D.o -o ej3 -lSDL2
 GameProyecto.o: GameProyecto.cpp GameProyecto.h Coordenada.o Asteroide.o Vector2D.o
 	g++ GameProyecto.cpp Asteroide.o Coordenada.o Vector2D.o -std=c++11 -c -lSDL2 -Wwrite-strings
@@ -11,4 +12,5 @@ Vector2D.o:
 clean:
 	rm *.o -f
 run: compile
+	clear
 	./ej3
