@@ -32,7 +32,7 @@ int main(int argc, char *argv[]){
     struct messageSC mensEnv;
     struct messageCS mensRcb;
     int pid, estado, fileDescriptor;
-    
+    int id, cant;
     
     if(argc != 2){
         cout << "Forma de uso: " << argv[0] <<  " puerto\n";
@@ -66,22 +66,10 @@ int main(int argc, char *argv[]){
                     cout << "El puerto de quien me enviÃ³ es: " << recepcion.obtienePuerto() << endl;
                     //recepcion.~PaqueteDatagrama();
                     memcpy((char *)&mensRcb, recepcion.obtieneDatos(), sizeof(mensRcb));
-                    cout << "Opcion recibida: = " << mensRcb.opcode << endl;
-                    cout << "count: = " << mensRcb.count << endl;
-                    cout << "offset: = " << mensRcb.offset << endl;
-                    cout << "nombre: " << mensRcb.name << endl;
-                    cout << "Mi estructura messageCS " << sizeof(struct messageCS);// << " mensEnv= " sizeof(struct messageCS) << " Bytes" << endl;
-                    if(mensRcb.opcode == READ){
-                        //printf("Solicitud para leer del archivo: %s desde un offset = %ld\n", mensaje.name, mensaje.offset);
-                        fileDescriptor = open(mensRcb.name, O_RDONLY);
-                        if(fileDescriptor == -1)
-                            mensEnv.result = E_IO;
-                        else{
-                            lseek(fileDescriptor, mensRcb.offset, SEEK_SET);
-                            mensEnv.count = read(fileDescriptor, mensEnv.data, BUF_SIZE);
-                            mensEnv.result = OK;
-                            close(fileDescriptor);
-                        }
+                    cout << "Cantidad solicitada: = " << mensRcb.cantidadSolicitada << endl;
+                    for (int i = 0; i < mensRcb.cantidadSolicitada; ++i)
+                    {
+                        mensEnv.id = i;
                         envio.inicializaDatos((char *) &mensEnv);
                         envio.inicializaIp(recepcion.obtieneDireccion());
                         envio.inicializaPuerto(recepcion.obtienePuerto());
