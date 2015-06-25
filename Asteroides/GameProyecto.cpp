@@ -10,7 +10,7 @@ GameProyecto::GameProyecto() {
 }	
 GameProyecto::~GameProyecto() {}
 void GameProyecto:: init(char* titulo ="Hola Mundo",int xpos = 0, int ypos = 0 , int alto = 100, int ancho = 100 , int banderas = 0, int cantAsteroides=100
-)
+	)
 {
 	
 	if (SDL_Init(SDL_INIT_EVERYTHING) != 0){
@@ -75,11 +75,15 @@ void GameProyecto:: render()
 }
 void GameProyecto:: update()
 {
+	int asteroidePeque;
+	int asteroideGrande;
 	for(int  i=0; i < asteroides.size(); i++) {
 		Coordenada centro = asteroides[i].obtenCentro();
-		if((centro.obtenerX()>650 || centro.obtenerX() <-50) || (centro.obtenerY()>650 || centro.obtenerY() <-50))
+		if((centro.obtenerX()>650 || centro.obtenerX() <-50) || (centro.obtenerY()>850 || centro.obtenerY() <-50))
 		{
-			centro = Coordenada(rand()%600,rand()%800);
+			centro = Coordenada(((double)600+rand()%50),(double)800+ rand()%50);
+			if(((int)(centro.obtenerX()))%2==0) centro = Coordenada(-centro.obtenerX()+600,centro.obtenerY());
+			if(((int)(centro.obtenerY()))%2==0) centro = Coordenada(centro.obtenerX(),-centro.obtenerY()+800);
 			asteroides[i].desplazamiento = Vector2D((float)rand(),(float)rand());
 			if(((int)asteroides[i].desplazamiento.getX())%3==0)	asteroides[i].desplazamiento.setX(-asteroides[i].desplazamiento.getX());
 			if(((int)asteroides[i].desplazamiento.getY())%3==0)	asteroides[i].desplazamiento.setY(-asteroides[i].desplazamiento.getY());
@@ -87,6 +91,35 @@ void GameProyecto:: update()
 		}
 		asteroides[i].posicionaCentro(Coordenada(centro.obtenerX()+ 1000/asteroides[i].calcArea()*asteroides[i].desplazamiento.getX(), centro.obtenerY() + 1000/asteroides[i].calcArea()*asteroides[i].desplazamiento.getY()));
 		asteroides[i].rota(1000/asteroides[i].calcArea());
+		for(int j = 0 ; j<i ; j++)
+		{
+			centro = asteroides[j].obtenCentro();
+			if((centro.obtenerX()>600 || centro.obtenerX() <0) || (centro.obtenerY()>800 || centro.obtenerY() <0))
+				continue;	
+			if(asteroides[i].choca(&asteroides[j]))
+			{
+				if(asteroides[j].calcArea()>asteroides[i].calcArea())
+				{
+					asteroidePeque = i;
+					asteroideGrande = j;
+				}	
+				else 
+				{
+					asteroidePeque = j;
+					asteroideGrande = i;
+				}						
+				asteroides[asteroideGrande].desplazamiento = Vector2D(asteroides[asteroideGrande].desplazamiento.getX() + asteroides[asteroidePeque].desplazamiento.getX()*2, asteroides[asteroideGrande].desplazamiento.getY()+ asteroides[asteroidePeque].desplazamiento.getY()*2);
+				asteroides[asteroideGrande].desplazamiento.normaliza();
+				centro = Coordenada(((double)600+rand()%50),(double)800+ rand()%50);
+				if(((int)(centro.obtenerX()))%2==0) centro = Coordenada(-centro.obtenerX()+600,centro.obtenerY());
+				if(((int)(centro.obtenerY()))%2==0) centro = Coordenada(centro.obtenerX(),-centro.obtenerY()+800);				
+				asteroides[asteroidePeque].desplazamiento = Vector2D((float)rand(),(float)rand());
+				if(((int)asteroides[asteroidePeque].desplazamiento.getX())%3==0)	asteroides[asteroidePeque].desplazamiento.setX(-asteroides[asteroidePeque].desplazamiento.getX());
+				if(((int)asteroides[asteroidePeque].desplazamiento.getY())%3==0)	asteroides[asteroidePeque].desplazamiento.setY(-asteroides[asteroidePeque].desplazamiento.getY());
+				asteroides[asteroidePeque].desplazamiento.normaliza();
+				asteroides[asteroidePeque].posicionaCentro(Coordenada(centro.obtenerX()+ 1000/asteroides[asteroidePeque].calcArea()*asteroides[asteroidePeque].desplazamiento.getX(), centro.obtenerY() + 1000/asteroides[asteroidePeque].calcArea()*asteroides[asteroidePeque].desplazamiento.getY()));
+			}
+		}
 	}
 }
 void GameProyecto:: handleEvents()

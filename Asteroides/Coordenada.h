@@ -14,5 +14,6 @@ public:
 	double obtenerX();
 
 	double obtenerY();
+	double calcDistancia(Coordenada c);
 };
 #endif

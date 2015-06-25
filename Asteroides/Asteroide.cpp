@@ -13,8 +13,6 @@ Asteroide::Asteroide(int cantLados, long double radio)
 	r = radio;
 	numLados = cantLados;
 	alpha = 2*PI/cantLados;
-	printf("NumLados es %d\n", numLados );
-	printf("radio es %lf\n", r );
 	for(int i = 0; i<cantLados; i++)
 	{
 		srand (i*7367);
@@ -72,4 +70,12 @@ long double Asteroide::obtenRadio()
 void Asteroide::rota(long double velocidad)
 {
 	rot = rot + 2*PI/1000*velocidad;
+}
+bool Asteroide::choca(Asteroide* ast)
+{
+	if (obtenCentro().calcDistancia(ast->obtenCentro())< (obtenRadio() + ast->obtenRadio()))
+	{
+		return true;
+	}
+	return false;
 }
