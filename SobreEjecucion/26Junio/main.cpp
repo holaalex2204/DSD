@@ -14,6 +14,7 @@
 SocketDatagrama* socketDat;
 PaqueteDatagrama* paqueteEnviarDat;
 PaqueteDatagrama* paqueteRecibirDat;
+uint32_t ultimo = 0;
 char * intToString(int num)
 {
 	char* arr = new char[3];
@@ -35,7 +36,7 @@ int StringToInt(char * a)
 }
 int main(int args, char* argv[])
 {
-	uint32_t ultimo = 0;
+	
 	char* ipParcial = argv[1];
 	int puerto = StringToInt(argv[2]);
 	struct messageCS msgToServer;
@@ -48,12 +49,16 @@ int main(int args, char* argv[])
 	do
 	{
 		socket.recibe(paqueteRecibir);
-		ultimo++;
+		ultimo= ultimo +1;
 		memcpy(&msgFromServer,paqueteRecibir.obtieneDatos(),sizeof(struct  messageSC));
 		if(ultimo < msgFromServer.id)
 		{
-			printf("Trama perdida en %d \n", ultimo );
+			printf("\t\tTrama perdida en %zu \n", ultimo );
 			ultimo = msgFromServer.id;
+		}
+		if(ultimo%(msgToServer.cantidadSolicitada/10)==0)
+		{
+			printf("Estoy en el paquete %zu\n",ultimo );
 		}
 	}while(ultimo< msgToServer.cantidadSolicitada);
 	printf("Ejecución Finalizada\n");
