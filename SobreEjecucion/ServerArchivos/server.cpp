@@ -67,7 +67,7 @@ int main(int argc, char *argv[]){
                     //recepcion.~PaqueteDatagrama();
                     memcpy((char *)&mensRcb, recepcion.obtieneDatos(), sizeof(mensRcb));
                     cout << "Cantidad solicitada: = " << mensRcb.cantidadSolicitada << endl;
-                    for (int i = 0; i < mensRcb.cantidadSolicitada; ++i)
+                    for (uint32_t i = 1; i <= mensRcb.cantidadSolicitada; ++i)
                     {
                         mensEnv.id = i;
                         envio.inicializaDatos((char *) &mensEnv);
