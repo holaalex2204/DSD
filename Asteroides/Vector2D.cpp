@@ -13,7 +13,7 @@ Vector2D::Vector2D(void)
 }
 float Vector2D::getX()
 {
-	return m_x;
+	return m_x; 
 }
 float Vector2D::getY()
 {

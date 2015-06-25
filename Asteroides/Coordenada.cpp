@@ -15,3 +15,7 @@ double Coordenada::obtenerY()
 
 	return y;
 }
+double Coordenada::calcDistancia(Coordenada c)
+{
+	return sqrt((c.obtenerX()-x)*(c.obtenerX()-x) + (c.obtenerY()-y)*(c.obtenerY()-y));
+}

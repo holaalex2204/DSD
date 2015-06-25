@@ -19,6 +19,7 @@ private:
 	vector <Coordenada> vertices;
 
 public:
+	bool choca(Asteroide*);
 	Vector2D desplazamiento;
 	Asteroide(int cantLados =3, long double radio =1.0);
 	double calcArea();
