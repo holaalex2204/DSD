@@ -45,7 +45,7 @@ int main(int args, char* argv[])
 	msgToServer.offset = 0;
 	bzero(msgToServer.name,MAX_PATH-1);
 	memcpy(msgToServer.name,argv[3],strlen(argv[3]));
-	PaqueteDatagrama paqueteRecibir = PaqueteDatagrama(sizeof(struct messageCS));
+	PaqueteDatagrama paqueteRecibir = PaqueteDatagrama(sizeof(struct messageSC));
 	PaqueteDatagrama paqueteEnviar = PaqueteDatagrama((char*)&msgToServer,(sizeof(struct messageCS)),ipParcial,7777);
 	SocketDatagrama socket= SocketDatagrama(puerto);
 	printf("%d\n",sizeof(struct messageCS));
