@@ -18,8 +18,6 @@ SocketDatagrama::SocketDatagrama(int puertoL)
     tiempofuera.tv_usec = 2;
     int yes = 1;
    s = socket(AF_INET, SOCK_DGRAM, 0);
-    setsockopt(s,SOL_SOCKET,SO_BROADCAST,&yes,sizeof(int));
-    setsockopt(s,SOL_SOCKET,SO_RCVTIMEO,&tiempofuera,sizeof(tiempofuera));
    
    bzero((char *)&direccionLocal, sizeof(struct sockaddr_in));
    bzero((char *)&direccionForanea, sizeof(struct sockaddr_in));      
